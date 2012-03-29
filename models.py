@@ -44,7 +44,7 @@ class Idea(models.Model):
     date_created = models.DateField(default=datetime.now())
     title = models.CharField(max_length=200)
     description = models.TextField()
-    image = models.ImageField(blank=True, upload_to='madscientist/uploads')
+    image = models.ImageField(blank=True, upload_to='madscientist')
     
     tag = models.ManyToManyField(Tag, null=True, blank=True, default=None)
     
