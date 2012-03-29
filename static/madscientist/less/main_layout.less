@@ -1,0 +1,90 @@
+/* This is a LESS stylesheet which holds layout styling that applies to all pages in the website.
+ * It uses variables from common.less, so that should either be imported here or in a chain of imports
+ * common.less should be imported before this one.
+ */
+
+@global-width: 960px;
+@sidebar-width: 451px;
+
+@space: 10px;
+
+@global-bg-color: #bbbbbb;
+@list-color: rgba(134, 172, 125, .6);
+
+body {
+  background-color: @global-bg-color;
+  background-image: url('../images/gray_stripe_bg.png');
+  background-repeat: repeat;
+}
+
+div#container, div#footer {
+  position: relative; 
+  margin: 0 0 0 100px; 
+  width: @global-width;
+}
+
+/* Inside the container is a content div and sidebar */
+div#sidebar {
+  position: relative; 
+  float: left;
+  padding: 0 0 0 @space;
+  width: @sidebar-width - @space;
+  
+  img#main_logo {
+    display: block;
+    float: left
+  }
+  
+  div.facet {
+    clear: left;
+    display: block;
+    
+    div.tag {
+      background-image: url('../images/postit_big.png');
+      width: 100px;
+      height:60px;
+      float: left; 
+      
+      p {
+        padding: @space @space 0 @space;
+        text-align: center;
+        word-wrap: break-word;
+        
+        span.active_filter { color: black; }
+      }
+    }
+  }
+
+}
+
+div#content {
+  position: relative; 
+  float: right;
+
+  margin: 0 0 0 @space;
+  padding: 0 0 @space @space;
+  border: 1px solid @list-color;
+  width: @global-width - @sidebar-width - (2px + @space*2);
+  
+  background: @list-color;
+  
+  img#todo {
+    display: block;
+  }
+  
+  ul {
+    margin: 0 0 0 @space;
+    padding: 0;
+    
+    list-style:outside;
+    list-style-image: url('../images/purple_bullet.png');
+    
+    li {
+      margin: 5px 0 0 0;
+    }
+  }
+}
+
+div#footer { 
+  text-align: center;
+}

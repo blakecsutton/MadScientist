@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<title>{% block title %}The mad scientist in me says AHAHAHAHA{% endblock %}</title>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}madscientist/css/all.css">
+<link rel="shorcut icon" type="image/ico" href="{{ STATIC_URL}}madscientist/images/madscientist.ico"/>
+</head>
+
+
+<div id="container">
+  
+<div id="sidebar">
+  <img id="main_logo" src="{{ STATIC_URL }}madscientist/images/logo_transparent.png" 
+       alt="Mad Scientist logo"/>
+       
+{% block sidebar %}
+       
+  {% if tag_filter %}
+  
+    <h3>Currently showing ideas tagged with '{{ tag_filter }}'.</h3>
+    <p>
+      <a href="/madscientist/"><< back to all ideas</a>
+    </p>
+   
+  {% else %}
+    <h3>{% block sidebar_title %}Currently showing all ideas.{% endblock %}</h3>
+  {% endif %}
+  
+  {% regroup tags by facet__name as tag_list %} 
+  
+  {% for facet in tag_list %}
+  
+    <div class="facet">
+      <h4>{{ facet.grouper }}</h4>
+      
+      {% for tag in facet.list %}
+        <div class="tag">
+          <p>
+            
+            {% if tag_filter == tag.name %}
+            <span class="active_filter">{{ tag.name }} ({{ tag.num_ideas }})</span>
+            {% else %}
+            <a href="/madscientist/?tag={{ tag.name }}">{{ tag.name }} ({{ tag.num_ideas }})</a>
+            {% endif %}
+         </p>
+        </div>
+      {% endfor %}
+    </div>
+    
+   {% endfor %}
+   
+   {% endblock %}
+
+</div>
+
+<div id="content">
+  
+  {% block content %}
+  
+  <img id="todo" src="{{ STATIC_URL }}madscientist/images/todo_someday_transparent.png" 
+       alt="TODO...someday!"/>
+  
+  <h3>Think of something else brilliant? <a href="/admin/madscientist/idea/add/">Write it down!</a></h3>
+  
+  <ul>
+    {% for idea in idea_list %}
+      <li><a href="/madscientist/ideas/{{ idea.id }}/">{{ idea.title }}</a> &ndash; {{ idea.description|striptags|truncatewords_html:15 }}
+    {% endfor %}
+  </ul>
+  
+  {% endblock %}
+</div>
+
+  <div style="clear: both;"></div>
+</div>
+
+<div id="footer">
+  <br>
+  <br>
+  <br>
+<h2>AHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHAHAHAHAHAHAHAHAHAHA</h2>
+  
+</div>
+
+</body>
+</html>

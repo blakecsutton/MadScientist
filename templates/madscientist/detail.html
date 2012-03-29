@@ -1,0 +1,16 @@
+{% extends "madscientist/base.html" %}
+
+{% block sidebar_title %}Tags for this idea (click on links to see related ideas):{% endblock %}
+{% block content %}
+<h1>So, tell me all about it!</h1>
+<h2>{{ idea.title }}</h2>
+<h4>Recorded on {{ idea.date_created }}</h4>
+<p>{{ idea.description|safe }}</p>
+{% if idea.image %}
+ <img src="{{ idea.image.url }}"/>
+{% endif %}
+<br />
+<a href="/madscientist"><< Back to idea list</a>
+{% endblock %}
+
+
