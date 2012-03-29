@@ -5,10 +5,10 @@ from models import Idea, Facet, Tag
 class CommonMedia:
   js = (
     'https://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js',
-    'js/editor.js',
+    'editor/js/editor.js',
   )
   css = {
-    'all': ('css/editor.css',),
+    'all': ('editor/css/editor.css',),
   }
 
 
