@@ -64,7 +64,7 @@
   
   <ul>
     {% for idea in idea_list %}
-      <li><a href="/madscientist/ideas/{{ idea.id }}/">{{ idea.title }}</a> &ndash; {{ idea.description|striptags|truncatewords_html:15 }}
+      <li><a href="/madscientist/ideas/{{ idea.id }}/">{{ idea.title }}</a> &ndash; {{ idea.description|striptags|safe|truncatewords_html:15 }}
     {% endfor %}
   </ul>
   
