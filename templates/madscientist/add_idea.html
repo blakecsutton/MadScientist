@@ -8,12 +8,15 @@
   
   <h3><a href="/madscientist/"><< Okay, take me back already.</a></h3>
   
+  <p>
+    <a href="/madscientist/logout/">Log me out now, please.</a>
+  </p>
+  
 {% endblock %}
 
 {% block content %}
 
 <h2>Okay, genius, what is it?</h2>
-
 
 <form action="/madscientist/add/" method="post">{% csrf_token %}
 <table>
