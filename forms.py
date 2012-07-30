@@ -1,6 +1,7 @@
 from django import forms
 from widgets import FacetedColumnCheckboxSelectMultiple
 from models import Idea, Tag
+from django.contrib.auth.models import User
 
 
 class IdeaForm(forms.ModelForm):
@@ -13,3 +14,8 @@ class IdeaForm(forms.ModelForm):
                                          widget=FacetedColumnCheckboxSelectMultiple )
     class Meta:
         model = Idea
+        
+class LoginForm(forms.Form):
+    username = forms.CharField(label="Username")
+    password = forms.CharField(widget=forms.PasswordInput(), label="Password")
+      
