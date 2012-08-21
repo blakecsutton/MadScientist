@@ -1,0 +1,90 @@
+// Left arrow button to go back
+.left_arrow {
+  margin: 20px 20px 0 20px;
+
+  width:25px;
+  height: 60px;
+  background: url("../images/slider-arrow-left2.png") no-repeat;
+  float: left;
+ 
+}
+
+// Container for the add-entry form
+.form_container {
+  margin-top: 10px;
+  float: left;
+}
+
+form#add_entry {
+  
+  // Validation errors
+  ul.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 5px;
+    color: #5a186e;
+    font-weight: bold;
+  }
+  
+  // Append * to required fields.
+  .required  label:after {
+    content: ' *';
+    color: #5a186e;
+   }
+  
+  // Fieldset general formatting, applies to overall tags fieldset.
+  fieldset {
+    border: 0;
+    margin: 5px;
+    padding: 5px;
+    
+    // Label for the tags field, to match the other labels.
+    legend { color: @header-text-color; }
+  }
+  
+    // Fieldset grouping the auto-generated fields from the model.
+   .post {  
+      // Give text / textarea matching widths
+      input[type=text] { width: 50em; }
+      textarea { width: 50em; }
+      
+       // Make labels appear in a column
+      label {
+        color: @header-text-color;
+        width: 80px;
+        display: inline-block;
+        vertical-align: top;       
+        line-height: 1.8;
+      }
+   }
+   
+   input.tag {
+     margin-left: 20px;
+   }
+  
+  // There is a fieldset enclosing the tags in each facet.
+  .facet {
+    
+    display: block;
+    
+    // Lighter color to distinguish from parent fieldset legend.
+    legend { color: @body-text-color; }
+    
+    // Hide the actual checkbox input so we can custom style.
+    input[type=checkbox] { display:none; }
+
+    // Make the checkboxes look like the tag bubble links.
+    input[type=checkbox] + label {
+      .tag_bubble;
+      &:hover { background: @tab-bg-color;}
+      color: @link-color;
+     }
+      
+    // Show if the checkbox was checked bychanging background
+    input[type=checkbox]:checked + label { .active_tag; }
+  }
+  
+}
+  
+
+
