@@ -4,113 +4,175 @@
  */
 
 @global-width: 960px;
-@sidebar-width: 451px;
-
-@space: 10px;
-
 @global-bg-color: #bbbbbb;
-@list-color: rgba(134, 172, 125, .6);
+
+@tab-bg-color: #E8E8E8; //#FFFBE0;
+@inactive-tab-bg-color: darken(@tab-bg-color, 3%);//rgba(229, 218, 231, 1);
 
 body {
-  background-color: @global-bg-color;
-  background-image: url('../images/gray_stripe_bg.png');
-  background-repeat: repeat;
+  background: @tab-bg-color;
 }
 
-div#container, div#footer {
+#header {
+  
+  position: relative;
+  margin: 0;
+  padding: 0;
+  background-color: @global-bg-color;
+  background: url('../images/gray_stripe_bg.png') repeat;
+  border-bottom: 1px solid black;
+  height: 85px;
+}
+#tagline {
+  position: absolute;
+  top: 5px;
+  left: 300px;
+}
+#title {
+  position: absolute;
+  top: 0;
+  left: 100px;
+}
+#header-image {
+  
+  z-index: 100;
+  position: absolute;
+  bottom: -12px;
+  
+  height: 86px;
+  width: 110px;
+  background: url('../images/peeking_girl2.png') 60% no-repeat;
+}
+
+#menu_bar {
+  position: absolute;
+  top: 0;
+  left: 60%;
+  margin: 10px;
+}
+
+#container, #footer {
   position: relative; 
-  margin: 0 0 0 100px; 
-  width: @global-width;
+  margin: 0;
+  background: @tab-bg-color;
+}
+
+#content {
+  padding: 10px;
 }
 
 /* Inside the container is a content div and sidebar */
-div#sidebar {
+#sidebar {
   
+  width: 280px;
   position: relative; 
   float: left;
-  padding: 0 0 0 @space;
-  width: @sidebar-width - @space;
+  padding: 0;
   
-  img#main_logo {
-    display: block;
-    float: left
-  }
+  margin: 0 10px 0 0;
   
-  .facet {
-    clear: left;
-    display: block;
+  h4 { .meta_heading; }
+}
+
+// The footer div
+#footer {
+  padding: 30px 10px 30px 10px; 
+}
+
+// Mix-in for tabs on a top navigation bar.
+.tab {
+    display: inline;
     
-    background: #CCCCCC;
-    border-radius: 10px;
-    border: 1px dashed black;
-    margin: 5px;
-    padding: 5px;
-  }
+    border-radius: 7px 7px 0 0;
+    padding: 5px 5px 1px 5px;
+    margin: 0 1px 0 1px;
+    
+    border: 1px solid black;
+}
+
+// Used for list description and facet headings.
+.meta_heading {
+  font-size: 100%;
+  color: #303030;
+  font-weight: bold;
+  border-bottom: 1px dotted #5a186e;
+}
+
+// Used to make things fade against the background to make them less
+// obtrusive. E.g., new tag plus buttons.
+.faded {
+ border: 1px solid #D1D1D1;
+ background: desaturate(@tab-bg-color, 20%);
+ color: #A1A1A1; 
+}
+
+// Used to make a rounded corner box with the text centered, whicht looks
+// like you can click on it and edit it. E.g., new facet box and new entry box.
+.editable_box {
   
-  // Clearfix to make the facet divs contain the floating tag divs.
-  .facet:before,
-  .facet:after {
-      content:"";
-      display:table;
-  }
-  .facet:after {
-      clear:both;
-  }
+  //.faded;
   
-  div.tag {
-    //background-image: url('../images/postit_big.png');
-    //width: 100px;
-    //height:60px;
+  border: 1px solid gray;
+  background: white;
+  color: @body-text-color;
+
+  padding: 5px;
+  margin: 2px 0 8px 0;
+  border-radius: 5px;
+}
+
+// Rounded bubble look for tags. Used as a mix-in.
+.tag_bubble {
+  // Float left so tags appear on the same line.
+  float: left;
+
+  padding: 2px 4px 2px 4px;
+  margin: 2px;
+  
+  // Rounded bubble border
+  border-radius: 5px;
+  border: 1px solid @link-color; 
+  &:hover { background: darken(@tab-bg-color, 10%); }
+}
+.empty_tag {
+  &:hover{ background: @tab-bg-color; }
+  border: 1px solid @body-text-color;
+}
+
+// Style to show tags are activated. Use as a mix-in only.
+.active_tag {
+  background: darken(@tab-bg-color, 10%);
+}
+
+// The facet/filter navigation menu in the sidebar
+ul.facet {
+  
+  margin: 5px 0 10px 0;
+
+  // Bubble look for tags 
+  .tag {
+     
+    .tag_bubble; 
     
-    float: left; 
-    
-    background: #F2F1B6;
-    //border: 1px solid black;
-    border-radius: 5px;
-    padding: 5px;
-    margin: 2px;
-    
-    p {
-      padding: 0;
-      margin: 0;
-      //padding: @space @space 0 @space;
-      text-align: center;
-      word-wrap: break-word;
-      
-      span.active_filter { color: black; }
+    // Tag text is enclosed in links which activate the tag.
+    a { 
+      text-decoration: none; 
+      &:visited { color: @link-color; }
     }
   }
-
+  
+  // Empty tags (tags with no associated entries) don't have links.
+  .empty { .empty_tag; }
+  
+  // Tags that are currently applied to the entry list.
+  .active { .active_tag; }
+  
+  // Button to create a new tag
+  .new_tag { .faded; }
 }
 
-div#content {
-  position: relative; 
-  float: right;
-
-  margin: 0 0 0 @space;
-  padding: 0 0 @space @space;
-  border: 1px solid @list-color;
-  width: @global-width - @sidebar-width - (2px + @space*2);
-  
-  background: @list-color;
-  
-  img#todo {
-    display: block;
+// The "new facet" bubble div used to create a new facet.
+div#new_facet { 
+  .editable_box; 
+  .faded;
   }
-  
-  ul {
-    margin: 0 0 0 @space;
-    padding: 0;
-    
-    list-style:outside;
-    list-style-image: url('../images/purple_bullet.png');
-    
-    li {
-      margin: 5px 0 0 0;
-    }
-  }
-}
-
-div#footer { 
-  text-align: center;
-}
