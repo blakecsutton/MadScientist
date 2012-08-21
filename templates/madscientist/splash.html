@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<title>{% block title %}The mad scientist in me says AHAHAHAHA{% endblock %}</title>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}madscientist/css/all.css">
+<link rel="shorcut icon" type="image/ico" href="{{ STATIC_URL}}madscientist/images/madscientist.ico"/>
+</head>
+<body>
+  
+  <div id="splash">
+    
+    {% block content %}
+    <h1>Mad Scientist</h1>
+    <h2>organize your ideas and take over the world</h2>
+    
+    <img src="{{ STATIC_URL }}madscientist/images/person.png"/>
+    
+    {% endblock %}
+  </div>
+  
+</body>
+</html>
