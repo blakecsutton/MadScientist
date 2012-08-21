@@ -1,0 +1,41 @@
+// Tab menu bar at the top of the page
+#tab_bar {
+  
+  margin: 10px 0 0 10px;
+  
+  // Make the tab bar stick to the bottom of the containing div
+  position: absolute;
+  bottom: 0;
+  left: 100px;
+  
+  // For inactive tabs (shown in the background).
+  li {
+    
+    .tab;
+    
+    background: @inactive-tab-bg-color;
+    &:hover { background: darken(@inactive-tab-bg-color, 5%); }
+    
+    // Text for inactive tabs go in links.
+    a { 
+      text-decoration: none; 
+      color: @link-color;
+      &:visited { color: @link-color; }  
+    }
+  }
+  
+  // For the currently visible tab.
+  .active {
+    
+    background: @tab-bg-color;
+    &:hover{ background: @tab-bg-color; }
+
+    // This makes the tab overflow its container and hide the border below it.
+    border-bottom: 0;
+    padding-bottom: 2px;
+  
+    // Name of current tab has no link.
+    color: @header-text-color;
+   }
+
+}
