@@ -1,17 +1,15 @@
-{% extends "madscientist/base.html" %}
+{% extends "madscientist/splash.html" %}
 
 {% block content %}
 <h1>Log in</h1>
 
 <p>{{ message }}</p>
-<form action="/madscientist/login/" method="post" id="login-form">
+<form action="/madscientist/login/?next={{ request.GET.next }}" method="post" id="login-form">
   {% csrf_token %}
  
 {{ form.as_ul }} 
 <input type="submit" value="Log in">
 </form>
 
-
-<a href="/madscientist"><< Back to idea list</a>
 {% endblock %}
 
