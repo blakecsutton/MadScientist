@@ -1,10 +1,15 @@
 from django.conf.urls.defaults import patterns
 
-urlpatterns = patterns('',                  
-    (r'^$', 'madscientist.views.idea_list'),
-    (r'^add/$', 'madscientist.views.add_idea'),
+urlpatterns = patterns('django.views.generic.simple',
+                       
+    (r'^splash$', 'direct_to_template', {'template': 'madscientist/splash.html'})
+)
+
+urlpatterns += patterns('',                  
+    (r'^$', 'madscientist.views.home'),
     (r'^login/$', 'madscientist.views.login_user'),
     (r'^logout/$', 'madscientist.views.logout_user'),
-    (r'^ideas/(?P<idea_id>\d+)/$', 'madscientist.views.idea_detail')
+    (r'^groups/(?P<group_id>\d+)/$', 'madscientist.views.entry_list'),
+    (r'^groups/(?P<group_id>\d+)/add/$', 'madscientist.views.add_entry')
 ) 
 
