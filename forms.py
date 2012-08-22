@@ -47,12 +47,9 @@ class EntryForm(CustomModelForm):
     # which would trigger an error because both group and creator are
     # required fields. 
     instance = super(EntryForm, self).save(commit=False)
-    
+
     # Now that we have an instance of the model, we can add back in the
     # other fields we handle outside of the modelform.
-    instance.creator = self.cleaned_data['creator']
-    instance.group = self.cleaned_data['group']
-    
     instance.save()
   
     instance.tags = self.cleaned_data['tags']
