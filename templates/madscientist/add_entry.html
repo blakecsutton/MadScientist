@@ -1,6 +1,6 @@
 {% extends "madscientist/base.html" %}
 
-<form id="add_entry" action="/madscientist/groups/{{ current_group.id }}/add/" method="post">{% csrf_token %}
+<form id="add_entry" method="post">{% csrf_token %}
 
 {% block content %}
 
@@ -13,7 +13,7 @@
  <div class="form_container" id="add_entry">
   <h2>Add New Entry ({{ current_group.short_title }})</h2>
   
-  <form id="add_entry" action="/madscientist/groups/{{ current_group.id }}/add/" method="post">{% csrf_token %}
+  <form id="add_entry" method="post">{% csrf_token %}
     <fieldset class="post">
       {{ entry_form.as_p }}
     </fieldset>  
@@ -34,14 +34,15 @@
         </ul>
       </fieldset>
      {% endif %}
-    
+
   {% for facet in tag_list %}
     <fieldset class="facet">
       <legend>{{ facet.grouper|default:"Uncategorized" }}</legend>
       <ul>
       {% for tag in facet.list %}
         <li>
-          <input type="checkbox" id="id_{{ tag.id }}" name="tags[]" value="{{ tag.id }}"/>
+          <input type="checkbox" id="id_{{ tag.id }}" name="tags[]" value="{{ tag.id }}"
+           {% if tag.id in entry_tags %}checked{% endif %} />
           <label for="id_{{ tag.id }}">{{ tag.name }}</label>
         </li>
       {% endfor %}
