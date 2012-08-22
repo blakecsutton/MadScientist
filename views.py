@@ -1,15 +1,15 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models.aggregates import Count
-from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.forms.formsets import formset_factory
+from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 from forms import LoginForm, EntryForm, FacetForm, TagForm
 from models import Entry, Facet, Tag, EntryGroup
-from django.forms.formsets import formset_factory
+import logging
 
 # import the logging library and get an instance of the logger
-import logging
 logger = logging.getLogger(__name__)
 
 @login_required(login_url="/madscientist/login")
@@ -124,16 +124,33 @@ def entry_list(request, group_id):
                               context_instance=RequestContext(request, context))     
   
 @login_required(login_url="/madscientist/login/")
-def add_entry(request, group_id):
-    """ This is a view to add an idea to a specific group. """
+def edit_entry(request, group_id, entry_id=None):
+    """ This is a view to either edit or add an entry to a specific group. 
+        If no entry_id is provided, the view assumes you are adding a new entry,
+        otherwise it will edit the entry with the corresponding id. """
     
-    # Reject requests for non-public groups the current user did not create
+    # Reject requests for groups the current user did not create
     group = EntryGroup.objects.get(pk=group_id)
  
-    # If user doesn't have permission to see this group, redirect
+    # If user doesn't have permission to see this group, raise Forbidden error.
     if request.user != group.creator:
-          return render_to_response('madscientist/forbidden.html',
-                              context_instance=RequestContext(request)) 
+      raise HttpResponseForbidden()
+    
+    # If an entry id was provided, use it to look up the corresponding entry.    
+    if entry_id:
+      entry = get_object_or_404(Entry, pk=entry_id)
+      entry_tags = entry.tags.values_list('id', flat=True)
+      
+      # If the entry's group doesn't match the current group, raise an error.
+      if entry.group != group:
+        raise Http404()
+      
+      if entry.creator != request.user:
+        raise HttpResponseForbidden()
+    else:
+      # Otherwise, create new Entry object for the current user, in the current group.
+      entry = Entry(creator=request.user, group=group)
+      entry_tags = []
     
     # Get tags for the current group and user to show them as options for the entry.
     tags = Tag.objects.filter(creator=request.user, group=group_id)
@@ -142,11 +159,10 @@ def add_entry(request, group_id):
     # Fetch a list of empty facets in case we want to display them
     facets = Facet.objects.filter(creator=request.user, group=group_id)
     empty_facets = facets.annotate(num_tags=Count('tag')).filter(num_tags=0).values('id', 'name')
-    
-    groups = EntryGroup.objects.filter(creator=request.user)
 
     if request.method == 'POST':
       
+      # Get flags used to see which sub-forms were submitted.
       submit_new_entry = request.POST.get('submit_new_entry', False)
       submit_new_facet = request.POST.get('submit_new_facet', False)
       submit_new_tag = request.POST.get('submit_new_tag', False)
@@ -176,7 +192,7 @@ def add_entry(request, group_id):
           
           new_tag = Tag(**tag_draft)
           new_tag.save()
-        
+       
       if submit_new_facet:
         
         facet_form = FacetForm(request.POST, prefix="facet")
@@ -195,20 +211,15 @@ def add_entry(request, group_id):
       
         # Bind the post request to the Entry ModelForm for validation and redisplay 
         # in case of errors.
-        entry_form = EntryForm(request.POST)
+        entry_form = EntryForm(request.POST, instance=entry)
 
         if entry_form.is_valid():
-          
-          # Manually add the current user and current group (from the url)
-          # as validated data in the modelform.
-          entry_form.cleaned_data['creator'] = request.user
-          entry_form.cleaned_data['group'] = group
             
           # Convert the list of tag id inputs into a list of Tag models      
           entry_tag_list = request.POST.getlist('tags[]')
           entry_tags = Tag.objects.in_bulk(entry_tag_list)
           entry_form.cleaned_data['tags'] = entry_tags
-          
+                               
           # Using the models' validated data, actually create a corresponding 
           # model instance and save it to the database.
           entry_form.save()
@@ -222,23 +233,27 @@ def add_entry(request, group_id):
         
         # Convert list of tag inputs to actual tag objects
         entry_tag_list = request.POST.getlist("tags[]")
-        entry_tags = Tag.objects.in_bulk(entry_tag_list)
         
-        entry_draft = {"title": request.POST.get("", ""),
+        entry_tags = Tag.objects.in_bulk(entry_tag_list)
+        entry_tags = [tag_id for tag_id in entry_tags]
+        
+        entry_draft = {"title": request.POST.get("title", ""),
                        "body": request.POST.get("body", ""),
-                       "image": request.POST.get("image", ""),
-                       "tags": entry_tag_list}
+                       "image": request.POST.get("image", "")}
         entry_form = EntryForm(initial=entry_draft)
 
     else:
         # Otherwise, display a blank version of the form
-        entry_form = EntryForm()
+        entry_form = EntryForm(instance=entry)
+        
+    groups = EntryGroup.objects.filter(creator=request.user)
         
     context = {'tags': tags,
                'empty_facets': empty_facets,
                'group_list': groups,
                'current_group': group,
-               'entry_form': entry_form}
+               'entry_form': entry_form,
+               'entry_tags': entry_tags}
     
     return render_to_response('madscientist/add_entry.html',
                               context_instance=RequestContext(request, context))
