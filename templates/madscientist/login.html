@@ -1,15 +1,27 @@
 {% extends "madscientist/splash.html" %}
 
 {% block content %}
-<h1>Log in</h1>
+<div class="form-container">
+<h1>Sign in</h1>
 
-<p>{{ message }}</p>
-<form action="/madscientist/login/?next={{ request.GET.next }}" method="post" id="login-form">
+<form method="post" class="user">
   {% csrf_token %}
- 
-{{ form.as_ul }} 
-<input type="submit" value="Log in">
+  <fieldset>
+{{ login_form.as_p }} 
+  </fieldset>
+<input type="submit" name="login" value="Log in">
 </form>
+</div>
+<div class="form-container">
+  <h1>Or sign up</h1>
+<form autocomplete=off method="post" class="user">
+  {% csrf_token %}
+  <fieldset>  
+  {{ signup_form.as_p }}
+  </fieldset>
+  <input type="submit" name="signup" value="Sign up">
+</form>
+</div>
 
 {% endblock %}
 
