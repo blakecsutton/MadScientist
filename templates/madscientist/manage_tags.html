@@ -1,0 +1,78 @@
+{% extends "madscientist/base.html" %}
+
+<form id="add_entry" method="post">{% csrf_token %}
+
+{% block content %}
+
+<h1>Okay, genius, what's your tagging system?</h1>
+
+ <a href="/madscientist/groups/{{ current_group.id }}/">
+ <div class="left_arrow"></div>
+ </a>
+ 
+ <div class="form_container">
+   
+  <h2>Manage Tags and Categories for {{ current_group.short_title }}</h2>
+
+  <form method="post">{% csrf_token %}
+
+    {% regroup tags by facet__name as tag_list %}   
+     {% if tag_list.0.grouper or not tag_list %}
+      <fieldset class="facet">
+        <legend>Uncategorized</legend>
+        <ul>
+          <li>
+            <input type="text" class="new_tag" name="tag-name-None" id="id_tag-name" placeholder="New tag">
+            <button type="submit" name="update_tags" value="tag-name-None">update</button>
+          </li>
+        </ul>
+      </fieldset>
+     {% endif %}
+
+  {% for facet in tag_list %}
+    <fieldset class="facet">
+      <legend>{{ facet.grouper|default:"Uncategorized" }}
+        {% if facet.grouper %}
+         <a href="/madscientist/groups/{{ current_group.id }}/facets/edit/{{ facet.list.0.facet__id }}/">(edit this category)</a>
+        {% endif %}       
+      </legend>
+      <ul>
+      {% for tag in facet.list %}
+        <li>
+          <input type="text" id="id_{{ tag.id }}" name="tag_{{ tag.id }}" value="{{ tag.name }}"/>
+        </li>
+      {% endfor %}
+        <li>
+          <input type="text" class="new_tag" name="tag-name-{{ facet.list.0.facet__id|default:'None' }}" id="id_tag-name" placeholder="New tag"/>
+        </li>
+      </ul> 
+      <p>
+      <button type="submit" name="update_tags" value="tag-name-{{ facet.list.0.facet__id|default:'None' }}">update</button>
+      </p>
+    </fieldset>
+  {% endfor %}
+  
+  {% for facet in empty_facets %}
+    <fieldset class="facet">
+      <legend>{{ facet.name }}
+              <a href="/madscientist/groups/{{ current_group.id }}/facets/edit/{{ facet.id }}/">(edit this category)</a>
+      </legend>
+      <ul>
+        <li>
+          <input type="text" class="new_tag" id="id_tag-name" name="tag-name-{{ facet.id }}" placeholder="New tag">
+          <button type="submit" name="submit_new_tag" value="tag-name-{{ facet.id }}" caption="add">update</button>
+       </li>
+      </ul>
+    </fieldset>
+  {% endfor %}  
+  
+  <fieldset class="new_facet">
+      <legend>Add New Category</legend>
+      {{ facet_form.as_p }}
+      <p><button type="submit" name="submit_new_facet" value="add">add</button></p>
+  </fieldset>
+  
+  </form>
+ </div>  
+
+{% endblock %}
