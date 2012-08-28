@@ -1,12 +1,59 @@
 #splash {
   margin: auto;
-  padding: 50px;
+  padding: 30px 0 10px 10px;
   width: 960px;
   
-  h1 {
-    font-size: 400%;
+  min-height: 500px;
+  
+  background: url('../images/dizzygirl_alone.png') 75% 30% no-repeat;
+ 
+  .form-container {
+    float: left;
+    margin: 20px 20px 20px 0;
+    padding: 10px;
+    border-radius: 5px;
+    background: #CCCCCC;
   }
-  h2 {
-    font-size: 200%;
+  
+  #logout {
+    margin: 20px;
+  }
+}
+  
+form.user {
+  
+  fieldset {
+    border: 0;
+    margin: 5px;
+    padding: 0;
+  }
+  
+  // Validation errors
+  ul.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 5px;
+    color: #5a186e;
+  }
+
+  // Append * to required fields.
+  .required  label:after {
+    content: ' *';
+    color: #5a186e;
+   }
+   
+  input[type="text"], input[type="password"] { width: 8em; }
+   
+   // Make labels appear in a column
+  label {
+    color: @header-text-color;
+    width: 80px;
+    display: inline-block;
+    vertical-align: top;       
+    line-height: 1.8;
+  }
+  
+  input[type="submit"] {
+    float: right;
   }
 }
