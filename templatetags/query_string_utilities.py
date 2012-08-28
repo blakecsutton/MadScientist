@@ -38,15 +38,19 @@ def remove_and_reencode(query_dict, keys):
         Usage: q|remove_and_urlencode:'deck,page'
     """
     
-    # Turn the comma-separated string into a list of keys
-    key_list = keys.rsplit(',')
-    temp = query_dict.copy()    
+    if query_dict:
     
-    for key in key_list:
-        if key in query_dict:
-            del temp[key]
-            
-    return temp.urlencode()
+      # Turn the comma-separated string into a list of keys
+      key_list = keys.rsplit(',')
+      temp = query_dict.copy()    
+      
+      for key in key_list:
+          if key in query_dict:
+              del temp[key]
+              
+      return temp.urlencode()
+    else:
+      return ""
   
 register.filter(remove_and_reencode)
 register.filter(remove_from_list)
