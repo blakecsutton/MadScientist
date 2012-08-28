@@ -6,7 +6,7 @@
 
 <h1>Okay, genius, what's your tagging system?</h1>
 
- <a href="/madscientist/groups/{{ current_group.id }}/">
+ <a href="{% url madscientist.views.entry_list current_group.id %}">
  <div class="left_arrow"></div>
  </a>
  
@@ -14,7 +14,7 @@
    
   <h2>Manage Tags and Categories for {{ current_group.short_title }}</h2>
 
-  <form method="post">{% csrf_token %}
+  <form method="post" class="data">{% csrf_token %}
 
     {% regroup tags by facet__name as tag_list %}   
      {% if tag_list.0.grouper or not tag_list %}
@@ -33,7 +33,7 @@
     <fieldset class="facet">
       <legend>{{ facet.grouper|default:"Uncategorized" }}
         {% if facet.grouper %}
-         <a href="/madscientist/groups/{{ current_group.id }}/facets/edit/{{ facet.list.0.facet__id }}/">(edit this category)</a>
+         <a href="{% url madscientist.views.edit_facet current_group.id facet.list.0.facet__id %}">(edit this category)</a>
         {% endif %}       
       </legend>
       <ul>
@@ -55,7 +55,7 @@
   {% for facet in empty_facets %}
     <fieldset class="facet">
       <legend>{{ facet.name }}
-              <a href="/madscientist/groups/{{ current_group.id }}/facets/edit/{{ facet.id }}/">(edit this category)</a>
+              <a href="{% url madscientist.views.edit_facet current_group.id facet.id %}">(edit this category)</a>
       </legend>
       <ul>
         <li>

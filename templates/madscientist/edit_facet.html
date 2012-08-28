@@ -5,16 +5,16 @@
 {% block content %}
 
 <h1>Okay genius, what's the plan?</h1>
-  <a href="/madscientist/groups/{{ current_group.id }}/tags/">
+  <a href="{% url madscientist.views.edit_tags current_group.id %}">
  <div class="left_arrow"></div>
  </a>
  
  <div class="form_container">
 
   <h2>Edit {{ current_group.short_title }} Category 
-    <a href="/madscientist/groups/{{ current_group.id }}/facets/delete/{{ facet_id }}/">(delete this category)</a>
+    <a href="{% url madscientist.views.delete_facet current_group.id facet_id %}">(delete this category)</a>
   </h2>
-  <form method="post">{% csrf_token %}
+  <form method="post" class="data">{% csrf_token %}
     
     <fieldset class="post">
     {{ facet_form.as_p }}

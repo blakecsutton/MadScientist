@@ -7,9 +7,9 @@
 <h1>Okay genius, what's the plan?</h1>
  
  {% if group_id %}
- <a href="/madscientist/groups/{{ group_id }}/">
+ <a href="{% url madscientist.views.entry_list group_id %}">
  {% else %}
- <a href="/madscientist/">
+ <a href="{% url madscientist.views.home %}">
  {% endif %}
  <div class="left_arrow"></div>
  </a>
@@ -19,12 +19,12 @@
    
   {% if group_id %}
     <h2>Edit {{ current_group.short_title }} Group 
-      <a href="/madscientist/groups/delete/{{ group_id }}/">(delete this group)</a>
+      <a href="{% url madscientist.views.delete_group group_id %}">(delete this group)</a>
     </h2>
   {% else %}
     <h2>Add New Group</h2>
   {% endif %}
-  <form id="add_entry" method="post">{% csrf_token %}
+  <form id="add_entry" method="post" class="data">{% csrf_token %}
     
     <fieldset class="post">
     {{ group_form.as_p }}
