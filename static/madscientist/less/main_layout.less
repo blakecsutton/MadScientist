@@ -9,10 +9,11 @@
 @tab-bg-color: #E8E8E8; //#FFFBE0;
 @inactive-tab-bg-color: darken(@tab-bg-color, 3%);//rgba(229, 218, 231, 1);
 
+html { height: 100%; }
 body {
   background: @tab-bg-color;
+  height: 100%;
 }
-
 #header {
   
   position: relative;
@@ -74,9 +75,18 @@ body {
   h4 { .meta_heading; }
 }
 
+// Wrapper to make the footer stick to the bottom of the screen.
+#wrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin: 0 auto -100px; /* the bottom margin is the negative value of the footer's height */
+}
+
 // The footer div
-#footer {
+#footer, #push {
   padding: 30px 10px 30px 10px; 
+  height: 60px; /* .push must be the same height as .footer */
 }
 
 // Mix-in for tabs on a top navigation bar.
