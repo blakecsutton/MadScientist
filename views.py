@@ -1,11 +1,13 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db.models.aggregates import Count
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
-from forms import LoginForm, EntryForm, FacetForm, EntryGroupForm, DetailedFacetForm, NewUserForm
+from forms import LoginForm, EntryForm, FacetForm, EntryGroupForm, \
+  DetailedFacetForm, NewUserForm
 from models import Entry, Facet, Tag, EntryGroup
 import logging
 
@@ -235,7 +237,7 @@ def edit_entry(request, group_id, entry_id=None):
           
           # After saving, redirect back to the page of the group where you saved
           # the new entry
-          return HttpResponseRedirect('/madscientist/groups/{}/'.format(group_id))
+          return HttpResponseRedirect(reverse('madscientist.views.entry_list', kwargs={'group_id': group_id}))
       else:
         
         # Manually re-display entry form information if a sub-form was submitted.
@@ -285,7 +287,7 @@ def delete_entry(request, group_id, entry_id):
   
   # And then delete the  entry
   entry.delete()
-  return HttpResponseRedirect('/madscientist/groups/{}/'.format(group_id))
+  return HttpResponseRedirect(reverse('madscientist.views.entry_list', kwargs={'group_id': group_id}))
 
 @login_required(login_url="/madscientist/login/")
 def edit_group(request, group_id=None):
@@ -315,7 +317,8 @@ def edit_group(request, group_id=None):
       instance = group_form.save()
       
       # Then redirect to the group's page.
-      return HttpResponseRedirect('/madscientist/groups/{}/'.format(instance.id))
+      return HttpResponseRedirect(reverse('madscientist.views.entry_list', 
+                                          kwargs={'group_id': instance.id}))
     
   else:
     group_form = EntryGroupForm(instance=group)
@@ -344,7 +347,7 @@ def delete_group(request, group_id):
   # @TODO: would be nice to have a warning about this in the future.
   group.delete()
   
-  return HttpResponseRedirect('/madscientist/')
+  return HttpResponseRedirect(reverse('madscientist.views.home'))
 
 @login_required(login_url="/madscientist/login/")
 def edit_tags(request, group_id):
@@ -458,7 +461,7 @@ def edit_facet(request, group_id, facet_id=None):
         facet_form.save()
         
         # Then redirect to the tag manager page
-        return HttpResponseRedirect('/madscientist/groups/{}/tags/'.format(group_id))
+        return HttpResponseRedirect(reverse('madscientist.views.edit_tags', kwargs={'group_id': group_id}))
         
     else:
       facet_form = DetailedFacetForm(instance=facet)
@@ -494,7 +497,7 @@ def delete_facet(request, group_id, facet_id):
     facet.delete()
     
     # And return to Tag Manager page
-    return HttpResponseRedirect("/madscientist/groups/{}/tags/".format(group_id))
+    return HttpResponseRedirect(reverse('madscientist.views.edit_tags', kwargs={'group_id': group_id}))
   
 @login_required(login_url="/madscientist/login/")   
 def logout_user(request):
@@ -539,7 +542,7 @@ def login_user(request):
               
               return HttpResponseRedirect(next_page)
             else:
-              return HttpResponseRedirect("/madscientist/")
+              return HttpResponseRedirect(reverse('madscientist.views.home'))
           
           else:
             # Disabled account
@@ -576,7 +579,7 @@ def login_user(request):
             password = signup_form.cleaned_data['password']
             user = authenticate(username=username, password=password)
             login(request, user)
-            return HttpResponseRedirect("/madscientist/")
+            return HttpResponseRedirect(reverse('madscientist.views.home'))
                 
   else:
     # Create a blank login form and a blank signup form,
