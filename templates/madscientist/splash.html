@@ -7,15 +7,12 @@
 </head>
 <body>
   
-  <div id="splash">
+  <div id="splash" class="clearfix">
     
-    {% block content %}
-    <h1>Mad Scientist</h1>
+    <img src="{{ STATIC_URL }}madscientist/images/logo_striped.png" alt="Mad Scientist"/>
     <h2>organize your ideas and take over the world</h2>
     
-    <img src="{{ STATIC_URL }}madscientist/images/person.png"/>
-    
-    {% endblock %}
+     {% block content %}{% endblock %}
   </div>
   
 </body>
