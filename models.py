@@ -1,5 +1,4 @@
 from django.db import models
-from datetime import datetime
 from django.contrib.auth.models import User
     
 class EntryGroup(models.Model):
@@ -14,10 +13,12 @@ class EntryGroup(models.Model):
   
   # Automatically update the timestamp whenever the model is saved.
   date_modified = models.DateField(auto_now=True)
-    
+  
+  # Longer title (or you can just copy the short title)
   title = models.CharField(max_length=200)
-  # Optional shorter title which appears on the tab
-  short_title = models.CharField(max_length=200, null=True, blank=True)
+  
+  # Shorter title which appears on the tab
+  short_title = models.CharField(max_length=200)
   
   description = models.TextField(null=True, blank=True)
   
@@ -73,7 +74,6 @@ class Tag(models.Model):
     def __unicode__(self):
          
         return self.name
-
     
 class Entry(models.Model):
   """ This is a single Entry, which belongs to one and only one Group.
@@ -95,7 +95,6 @@ class Entry(models.Model):
     
   def __unicode__(self):
       return self.title
-    
     
   class Meta:
     verbose_name = "Entry"
