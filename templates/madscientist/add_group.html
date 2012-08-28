@@ -1,0 +1,39 @@
+{% extends "madscientist/base.html" %}
+
+<form id="add_group" method="post" class="data">{% csrf_token %}
+
+{% block content %}
+
+<h1>Okay genius, what's the plan?</h1>
+ 
+ {% if group_id %}
+ <a href="/madscientist/groups/{{ group_id }}/">
+ {% else %}
+ <a href="/madscientist/">
+ {% endif %}
+ <div class="left_arrow"></div>
+ </a>
+ 
+ <div class="form_container">
+   
+   
+  {% if group_id %}
+    <h2>Edit {{ current_group.short_title }} Group 
+      <a href="/madscientist/groups/delete/{{ group_id }}/">(delete this group)</a>
+    </h2>
+  {% else %}
+    <h2>Add New Group</h2>
+  {% endif %}
+  <form id="add_entry" method="post">{% csrf_token %}
+    
+    <fieldset class="post">
+    {{ group_form.as_p }}
+      </fieldset>
+
+    <input type="submit" value="Submit" name="submit_new_entry"/>
+  
+  </form>
+
+ </div>  
+
+{% endblock %}
