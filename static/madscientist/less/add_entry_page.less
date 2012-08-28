@@ -13,9 +13,10 @@
 .form_container {
   margin-top: 10px;
   float: left;
+  width: 60%;
 }
 
-form#add_entry {
+form.data {
   
   // Validation errors
   ul.errorlist {
@@ -82,6 +83,40 @@ form#add_entry {
       
     // Show if the checkbox was checked bychanging background
     input[type=checkbox]:checked + label { .active_tag; }
+    
+    input[type=text] {
+      margin-left: 10px;
+      float: left;
+    }
+    
+    p {
+      margin-left: 10px;
+      clear: left;
+      display: block;
+    }
+  }
+  
+  .new_facet {
+    
+      // Lighter color to distinguish from parent fieldset legend.
+      legend { 
+        color: @body-text-color; 
+       }
+      
+      p { margin-left: 10px; }  
+      // Give text / textarea matching widths
+      input[type=text] { width: 40em; }
+      textarea { 
+        width: 40em;
+        height: 4em; }
+      
+       // Make labels appear in a column
+      label {
+        width: 80px;
+        display: inline-block;
+        vertical-align: top;       
+        line-height: 1.8;
+      }
   }
   
 }
