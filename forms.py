@@ -1,6 +1,7 @@
 from django import forms
 from django.forms.util import ErrorList
-from models import Entry, Tag, Facet
+from models import Entry, Tag, Facet, EntryGroup
+from django.contrib.auth.models  import User
 from widgets import FacetedColumnCheckboxSelectMultiple
 import logging
 
@@ -21,6 +22,19 @@ class AdminEntryForm(forms.ModelForm):
   class Meta:
     model = Entry
 
+class CustomForm(forms.Form):
+  
+  # This constructor exists purely so I can override the default value of 
+  # label_suffix for this form and get rid of the automatic colons, instead
+  # of having that detail in the view logic.
+  def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None,
+               initial=None, error_class=ErrorList, label_suffix='',
+               empty_permitted=False):
+    
+    super(CustomForm, self).__init__(data, files, auto_id, prefix, initial,
+                                          error_class, label_suffix, empty_permitted)
+    
+    
 class CustomModelForm(forms.ModelForm):
   
   # This constructor exists purely so I can override the default value of 
@@ -44,20 +58,16 @@ class EntryForm(CustomModelForm):
         form shown to the user. """
     
     # Save the filled in model fields without saving to the database,
-    # which would trigger an error because both group and creator are
-    # required fields. 
+    # so that we have a primary key as needed for many-to-many
+    # relationships.
     instance = super(EntryForm, self).save(commit=False)
-
-    # Now that we have an instance of the model, we can add back in the
-    # other fields we handle outside of the modelform.
     instance.save()
-  
-    instance.tags = self.cleaned_data['tags']
     
+    instance.tags = self.cleaned_data['tags']
+  
     if commit:
-        instance.save()
         self.save_m2m()
-        
+
     return instance 
   
   title = forms.CharField(error_messages={'required': 'Oops, your idea needs a title.'})
@@ -68,6 +78,18 @@ class EntryForm(CustomModelForm):
     model = Entry
     exclude = ['creator', 'group', 'tag']
     fields = ['title', 'image', 'body']
+
+class EntryGroupForm(CustomModelForm):
+  
+  title = forms.CharField(error_messages={'required': 'Oops, your group needs a title.'})
+  short_title = forms.CharField(error_messages={'required': 'Oops, your group needs a short title to display on the tab.'})
+  required_css_class = "required"  
+  
+  class Meta:
+    model = EntryGroup
+    exclude = ['creator']
+    fields = ['public', 'short_title','title', 'description']
+
 
 class TagForm(CustomModelForm):
   
@@ -85,6 +107,7 @@ class TagForm(CustomModelForm):
     # required fields. 
     instance = super(TagForm, self).save(commit=False)
     
+    # @TODO: Move these auto-filled fields to the view. 
     # Now that we have an instance of the model, we can add back in the
     # other fields we handle outside of the modelform.
     instance.creator = self.cleaned_data['creator']
@@ -121,9 +144,38 @@ class FacetForm(CustomModelForm):
     instance.save()
      
     return instance     
+  
+class DetailedFacetForm(CustomModelForm):
+  
+  name = forms.CharField(error_messages={'required': 'Oops, your category needs a name.'})
+  required_css_class = "required"  
+  
+  class Meta:
+    model = Facet
+    exclude = ['creator', 'group']
+    
+  def save(self, commit=True):
+    """ For this form save is overriden so that we can manually
+        add back in two required fields excluded from the 
+        form shown to the user. """
+    
+    # Save the filled in model fields without saving to the database,
+    # which would trigger an error because both group and creator are
+    # required fields. 
+    instance = super(DetailedFacetForm, self).save(commit=False)
+    
+    instance.save()
+     
+    return instance 
       
-class LoginForm(forms.Form):
+class LoginForm(CustomForm):
   """ Very simple form to login a user. """
   username = forms.CharField(label="Username")
   password = forms.CharField(widget=forms.PasswordInput(), label="Password")
-      
+
+    
+class NewUserForm(CustomForm):
+  """ Very simple form to create a new user. """
+  email = forms.EmailField(label="Email", required=True)
+  username = forms.CharField(label="Username", required=True) 
+  password = forms.CharField(widget=forms.PasswordInput(), label="Password", required=True)
