@@ -42,22 +42,23 @@ def entry_list(request, username, group_id):
         Later, will want to add the ability to filter by tag, as well as search.
     """
     
-    if username:
-      
-      if request.user.username != username:
-        raise PermissionDenied()
-    
     if group_id:
       
-      # Reject requests for non-public groups the current user did not create
+      # If a group id is provided, it better be valid
       group = get_object_or_404(EntryGroup, pk=group_id)
     
       # If user doesn't have permission to see this group, redirect
       if (request.user != group.creator and
           not group.public):
           
-          return render_to_response('madscientist/forbidden.html',
-                                    context_instance=RequestContext(request)) 
+          raise PermissionDenied()
+      
+      # Now check the username in the URL against the current user    
+      if username:
+      
+        if (request.user.username != username and
+            not group.public):
+          raise PermissionDenied()
           
       # Get the list of entries for the current user and group
       entries = Entry.objects.filter(creator=request.user, group=group_id)
