@@ -2,7 +2,10 @@ from django.conf.urls.defaults import patterns
 
 urlpatterns = patterns('django.views.generic.simple',
                        
-    (r'^splash$', 'direct_to_template', {'template': 'madscientist/splash.html'})
+    (r'^whats-it-do/', 'direct_to_template', {'template': 'madscientist/what.html'}),
+    (r'^take-the-tour/', 'direct_to_template', {'template': 'madscientist/tour.html'}),
+    (r'^about/', 'direct_to_template', {'template': 'madscientist/about.html'}),
+    
 )
 """
 @TODO: Make URLs include the username and such.
