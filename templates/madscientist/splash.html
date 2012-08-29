@@ -6,14 +6,48 @@
 <link rel="shorcut icon" type="image/ico" href="{{ STATIC_URL}}madscientist/images/madscientist.ico"/>
 </head>
 <body>
-  
-  <div id="splash" class="clearfix">
+
+  <div id="splash" class="wrapper clearfix">
     
     <img src="{{ STATIC_URL }}madscientist/images/logo_striped.png" alt="Mad Scientist"/>
-    <h2>organize your ideas and take over the world</h2>
-    
+    <h2>Organize your ideas and take over the world!</h2> 
      {% block content %}{% endblock %}
-  </div>
-  
+     
+    {% block menu %}
+    <div class="menu clearfix">
+     <ul>
+       <li>
+         {% if "/madscientist/login/" in request.path %}
+          Sign up
+         {% else %}
+          <a href="/madscientist/login/">Sign up</a>
+         {% endif %}
+       </li>
+       <li>
+         {% if "/madscientist/whats-it-do/" in request.path %}
+          What's it do?
+         {% else %}
+          <a href="/madscientist/whats-it-do/">What's it do?</a>
+         {% endif %}
+       </li>
+       <li>
+         {% if "/madscientist/take-the-tour" in request.path %}
+          Take a Tour
+         {% else %}
+         <a href="/madscientist/take-the-tour/">Take a Tour</a>
+         {% endif %}
+       </li>
+       <li>
+         {% if "/madscientist/about/" in request.path %}
+         About
+         {% else %} 
+         <a href="/madscientist/about/">About</a>
+         {% endif %}
+       </li>
+     </ul>
+    </div>
+    
+   </div>
+  {% endblock %}
 </body>
 </html>
