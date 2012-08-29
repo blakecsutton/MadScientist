@@ -6,7 +6,7 @@
 
 <h1>Okay, genius, what is it?</h1>
 
- <a href="{% url madscientist.views.entry_list current_group.id %}">
+ <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}">
  <div class="left_arrow"></div>
  </a>
  
@@ -14,7 +14,7 @@
   {% if entry_id %}
     <h2>Edit {{ current_group.short_title }} Entry 
       
-      <a href="{% url madscientist.views.delete_entry current_group.id entry_id %}">(delete this entry)</a>
+      <a href="{% url madscientist.views.delete_entry request.user.username current_group.id entry_id %}">(delete this entry)</a>
     </h2>
   {% else %}
     <h2>Add New {{ current_group.short_title }} Entry</h2>
