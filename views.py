@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db.models.aggregates import Count
-from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 from forms import LoginForm, EntryForm, FacetForm, EntryGroupForm, \
@@ -15,8 +16,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 @login_required(login_url="/madscientist/login")
-def home(request):
-  
+def home(request, username=None):
+
+  # Check that username in the URL matches username in the session.
+  if username:
+    
+    logger.debug("Username is {}".format(username))
+    
+    if request.user.username != username:
+      raise PermissionDenied()
+    
   # Just show the groups view with the most recently updated group as the active group.
   entries = Entry.objects.filter(creator=request.user).order_by('date_created')
   
@@ -25,13 +34,18 @@ def home(request):
   else:
     group_id = None
     
-  return entry_list(request, group_id)
+  return entry_list(request, request.user.username, group_id)
 
 @login_required(login_url="/madscientist/login/")
-def entry_list(request, group_id):
+def entry_list(request, username, group_id):
     """ This is the main view for the site, which displays the list of ideas and the related tags.
         Later, will want to add the ability to filter by tag, as well as search.
     """
+    
+    if username:
+      
+      if request.user.username != username:
+        raise PermissionDenied()
     
     if group_id:
       
@@ -145,7 +159,7 @@ def edit_entry(request, group_id, entry_id=None):
  
     # If user doesn't have permission to see this group, raise Forbidden error.
     if request.user != group.creator:
-      raise HttpResponseForbidden()
+      raise PermissionDenied()
     
     # If an entry id was provided, use it to look up the corresponding entry.    
     if entry_id:
@@ -157,7 +171,7 @@ def edit_entry(request, group_id, entry_id=None):
         raise Http404()
       
       if entry.creator != request.user:
-        raise HttpResponseForbidden()
+        raise PermissionDenied()
     else:
       # Otherwise, create new Entry object for the current user, in the current group.
       entry = Entry(creator=request.user, group=group)
@@ -283,7 +297,7 @@ def delete_entry(request, group_id, entry_id):
     if entry.group != group:
       raise Http404()
   else:
-    raise HttpResponseForbidden()
+    raise PermissionDenied()
   
   # And then delete the  entry
   entry.delete()
@@ -299,7 +313,7 @@ def edit_group(request, group_id=None):
     group = get_object_or_404(EntryGroup, pk=group_id)
     
     if group.creator != request.user:
-      raise HttpResponseForbidden()
+      raise PermissionDenied()
   
   else:
     group = EntryGroup(creator=request.user)
@@ -341,7 +355,7 @@ def delete_group(request, group_id):
   
   group = get_object_or_404(EntryGroup, pk=group_id)
   if request.user != group.creator:
-    raise HttpResponseForbidden()
+    raise PermissionDenied()
   
   # If it's all good, delete the group.
   # @TODO: would be nice to have a warning about this in the future.
@@ -361,7 +375,7 @@ def edit_tags(request, group_id):
  
     # If user doesn't have permission to see this group, raise Forbidden error.
     if request.user != group.creator:
-      raise HttpResponseForbidden()
+      raise PermissionDenied()
     
     # Get tags for the current group and user to show them as options for the entry.
     tags = Tag.objects.filter(creator=request.user, group=group_id)
@@ -444,7 +458,7 @@ def edit_facet(request, group_id, facet_id=None):
  
     # If user doesn't have permission to see this group, raise Forbidden error.
     if request.user != group.creator:
-      raise HttpResponseForbidden()
+      raise PermissionDenied()
     
     if facet_id:
       facet = get_object_or_404(Facet, pk=facet_id)
@@ -485,7 +499,7 @@ def delete_facet(request, group_id, facet_id):
  
     # If user doesn't have permission to see this group, raise Forbidden error.
     if request.user != group.creator:
-      raise HttpResponseForbidden()
+      raise PermissionDenied()
     
     facet = get_object_or_404(Facet, pk=facet_id)
     
@@ -501,7 +515,8 @@ def delete_facet(request, group_id, facet_id):
   
 @login_required(login_url="/madscientist/login/")   
 def logout_user(request):
-  """ This is a view which logs out the current user. """
+  
+  logger.debug("What is going on here?")
   logout(request)
   return render_to_response('madscientist/success.html',
                             context_instance=RequestContext(request))
@@ -542,7 +557,8 @@ def login_user(request):
               
               return HttpResponseRedirect(next_page)
             else:
-              return HttpResponseRedirect(reverse('madscientist.views.home'))
+              return HttpResponseRedirect(reverse('madscientist.views.home', 
+                                                  kwargs={'username': request.user.username}))
           
           else:
             # Disabled account
@@ -579,7 +595,8 @@ def login_user(request):
             password = signup_form.cleaned_data['password']
             user = authenticate(username=username, password=password)
             login(request, user)
-            return HttpResponseRedirect(reverse('madscientist.views.home'))
+            return HttpResponseRedirect(reverse('madscientist.views.home', 
+                                                kwargs={'username': request.user.username}))
                 
   else:
     # Create a blank login form and a blank signup form,
