@@ -11,6 +11,8 @@
   
 <div id="wrapper">
 {% load query_string_utilities %}
+{% load random_quote %}
+{% load typogrify %}
 <div id="header" class="clearfix">
   
  <img id="title" alt="Mad Scientist" src="{{ STATIC_URL }}madscientist/images/logo_striped2.png"/> 
@@ -26,7 +28,7 @@
       {% if group.id == current_group.id %}
        <li class="active">{{ group.short_title}}</li>
       {% else %}
-       <li><a href="{% url madscientist.views.entry_list group.id %}">{{ group.short_title }}</a></li>
+       <li><a href="{% url madscientist.views.entry_list request.user.username group.id %}">{{ group.short_title }}</a></li>
       {% endif %}
       
     {% endfor %}
@@ -48,11 +50,11 @@
         <h1>Tags</h1>  
           {% if current_group %}
             {% if options.show_empty_tags %}
-              <a href="{% url madscientist.views.entry_list current_group.id %}?{{ active_options|remove_and_reencode:'show_empty_tags' }}&show_empty_tags=0">
+              <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'show_empty_tags' }}&show_empty_tags=0">
                 hide empty tags
               </a>
              {% else %}
-              <a href="{% url madscientist.views.entry_list current_group.id %}?{{ active_options|remove_and_reencode:'show_empty_tags' }}&show_empty_tags=1">
+              <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'show_empty_tags' }}&show_empty_tags=1">
                 show empty tags
               </a>        
              {% endif %}
@@ -80,7 +82,7 @@
                 {% if tag.active %}
                   <li class="tag active">
                             
-                    <a href="{% url madscientist.views.entry_list current_group.id %}?{{ active_options|remove_and_reencode:'tag' }}&{{ options.active_tags|remove_from_list:tag.id|encode_list:'tag' }}">
+                    <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'tag' }}&{{ options.active_tags|remove_from_list:tag.id|encode_list:'tag' }}">
                     
                       {{ tag.name }} ({{ tag.num_ideas }})</a>
                   </li>              
@@ -92,7 +94,7 @@
                    {% else %}
                     <li class="tag">
                       
-                      <a href="{% url madscientist.views.entry_list current_group.id %}?{{ active_options|remove_and_reencode:'tag' }}&tag={{ tag.id }}&{{ options.active_tags|encode_list:'tag' }}">
+                      <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'tag' }}&tag={{ tag.id }}&{{ options.active_tags|encode_list:'tag' }}">
                         {{ tag.name }} ({{ tag.num_ideas }})</a>
                     </li>
                     {% endif %}
@@ -162,7 +164,7 @@
                 
                 <p class="tags">tags: {{ entry.tags.all|join:", "|default:"none" }}</p>
                 
-                <a href="{% url madscientist.views.entry_list current_group.id %}?{{ active_options|remove_and_reencode:'expand' }}">(less)</a>
+                <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'expand' }}">(less)</a>
                 
               {% else %}
               
@@ -173,7 +175,7 @@
                   &ndash; {{ entry.body|safe|truncatewords_html:10 }}
                 {% endif %} 
                 
-                <a href="{% url madscientist.views.entry_list current_group.id %}?{{ active_options|remove_and_reencode:'expand' }}&expand={{ entry.id }}">(more)</a> 
+                <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'expand' }}&expand={{ entry.id }}">(more)</a> 
                  
              {% endif %}
            </li>
@@ -192,15 +194,16 @@
 </div>
 
 <div id="footer">
-
-   <h2>The mad scientist in me says 'yes'!</h2>
-    
-    <!--Hey, what should go in this footer? A quote maybe? I do like quotes... maybe quotes from
-    and about mad scientists, visionaries, prophets, inventors, and other crazy people?
-    
-    And maybe also organization and the benefits thereof? Union song ("unless we organize.." haha)
-    -->
   
+
+    {% autoescape off %}
+    {% filter widont %}
+    {% filter smartypants %}
+    <h2>{{ 'madscientist/files/quotes.txt'|random_quote|join:"</h2><h3>" }}</h3>
+    {% endfilter %}
+    {% endfilter %}
+    {% endautoescape %} 
+
 </div>
 
 </body>
