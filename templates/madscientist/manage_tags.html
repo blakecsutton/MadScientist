@@ -6,7 +6,7 @@
 
 <h1>Okay, genius, what's your tagging system?</h1>
 
- <a href="{% url madscientist.views.entry_list current_group.id %}">
+ <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}">
  <div class="left_arrow"></div>
  </a>
  

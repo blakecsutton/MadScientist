@@ -7,7 +7,7 @@
 <h1>Okay genius, what's the plan?</h1>
  
  {% if group_id %}
- <a href="{% url madscientist.views.entry_list group_id %}">
+ <a href="{% url madscientist.views.entry_list request.user.username group_id %}">
  {% else %}
  <a href="{% url madscientist.views.home %}">
  {% endif %}
