@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.db.models.aggregates import Count
@@ -36,39 +36,57 @@ def home(request, username=None):
     
   return entry_list(request, request.user.username, group_id)
 
-@login_required(login_url="/madscientist/login/")
+# No login required decorate because we're handling the authentication manually.
 def entry_list(request, username, group_id):
     """ This is the main view for the site, which displays the list of ideas and the related tags.
         Later, will want to add the ability to filter by tag, as well as search.
     """
-    
+      
     if group_id:
       
       # If a group id is provided, it better be valid
       group = get_object_or_404(EntryGroup, pk=group_id)
-    
-      # If user doesn't have permission to see this group, redirect
-      if (request.user != group.creator and
-          not group.public):
-          
-          raise PermissionDenied()
       
-      # Now check the username in the URL against the current user    
-      if username:
+      # Manually check if user is logged in
+      logged_in = request.user.is_authenticated()
+      if (logged_in or
+          group.public):
       
-        if (request.user.username != username and
+        # If user doesn't have permission to see this group, redirect
+        if (request.user != group.creator and
             not group.public):
-          raise PermissionDenied()
+            
+            raise PermissionDenied()
+        
+        # Now check the username in the URL against the current user    
+        if username:
+        
+          if (request.user.username != username and
+              not group.public):
+            raise PermissionDenied()
+          
+          logger.debug("request.user is {}".format(request.user))
+          if logged_in:
+            user = request.user
+          else:
+            user = User.objects.get(username=username)
+            
+          logger.debug("and now user is {}".format(user))
+             
+      else:
+        # If an unauthenticated user tries to view a non-public group,
+        # redirect to the login page.
+        return HttpResponseRedirect('/madscientist/login/?next=%s' % request.path)
           
       # Get the list of entries for the current user and group
-      entries = Entry.objects.filter(creator=request.user, group=group_id)
+      entries = Entry.objects.filter(creator=user, group=group_id)
       
       # Find all of the user's tags for this group.
-      tags = Tag.objects.filter(creator=request.user, group=group_id)
+      tags = Tag.objects.filter(creator=user, group=group_id)
       tags = tags.annotate(num_ideas=Count('entry'))
       
       # Fetch a list of empty facets in case we want to display them
-      facets = Facet.objects.filter(creator=request.user, group=group_id)
+      facets = Facet.objects.filter(creator=user, group=group_id)
       empty_facets = facets.annotate(num_tags=Count('tag')).filter(num_tags=0).values('name')
       
       # Display options for use in the template
@@ -114,7 +132,7 @@ def entry_list(request, username, group_id):
           nonempty_tags = tags.filter(num_ideas__gt=0) 
           tags = nonempty_tags
           
-      entries = entries.order_by('-date_created')
+      entries = entries.order_by('-date_created', '-id')
       
       # Handle the option of expanding a particular entry in full
       if request.method == 'GET' and 'expand' in request.GET:
@@ -133,7 +151,7 @@ def entry_list(request, username, group_id):
       
       # Todo in future: add an ordering fields to EntryGroups so users can rearrange tabs.
       # Also probably a "pinned" flag to indicate whether or not to currently display it.
-      groups = EntryGroup.objects.filter(creator=request.user)
+      groups = EntryGroup.objects.filter(creator=user)
           
       context = {'entry_list': entries,
                  'tags': tags,
@@ -141,7 +159,8 @@ def entry_list(request, username, group_id):
                  'active_options': active_options,
                  'options': options,
                  'group_list': groups,
-                 'current_group': group}
+                 'current_group': group,
+                 'username': user.username}
       
     else:
       context = {}
@@ -252,7 +271,9 @@ def edit_entry(request, group_id, entry_id=None):
           
           # After saving, redirect back to the page of the group where you saved
           # the new entry
-          return HttpResponseRedirect(reverse('madscientist.views.entry_list', kwargs={'group_id': group_id}))
+          return HttpResponseRedirect(reverse('madscientist.views.entry_list', 
+                                              kwargs={'username': request.user.username,
+                                                      'group_id': group_id}))
       else:
         
         # Manually re-display entry form information if a sub-form was submitted.
@@ -280,7 +301,8 @@ def edit_entry(request, group_id, entry_id=None):
                'current_group': group,
                'entry_form': entry_form,
                'entry_tags': entry_tags,
-               'entry_id': entry_id}
+               'entry_id': entry_id,
+               'username': request.user.username}
     
     return render_to_response('madscientist/add_entry.html',
                               context_instance=RequestContext(request, context))
@@ -302,7 +324,9 @@ def delete_entry(request, group_id, entry_id):
   
   # And then delete the  entry
   entry.delete()
-  return HttpResponseRedirect(reverse('madscientist.views.entry_list', kwargs={'group_id': group_id}))
+  return HttpResponseRedirect(reverse('madscientist.views.entry_list', 
+                                      kwargs={'username': request.user.username,
+                                              'group_id': group_id}))
 
 @login_required(login_url="/madscientist/login/")
 def edit_group(request, group_id=None):
@@ -333,7 +357,8 @@ def edit_group(request, group_id=None):
       
       # Then redirect to the group's page.
       return HttpResponseRedirect(reverse('madscientist.views.entry_list', 
-                                          kwargs={'group_id': instance.id}))
+                                          kwargs={'username': request.user.username,
+                                                  'group_id': instance.id}))
     
   else:
     group_form = EntryGroupForm(instance=group)
@@ -344,7 +369,8 @@ def edit_group(request, group_id=None):
     
   context = {'group_list': groups,
              'group_form': group_form,
-             'group_id': group_id}
+             'group_id': group_id,
+             'username': request.user.username}
   
   return render_to_response('madscientist/add_group.html',
                             context_instance=RequestContext(request, context))    
@@ -429,13 +455,12 @@ def edit_tags(request, group_id):
           
       if submit_new_facet:
         
-        facet_form = DetailedFacetForm(request.POST)
+        
+        facet = Facet(creator=request.user, group=group)
+        facet_form = DetailedFacetForm(request.POST, instance=facet)
         
         if facet_form.is_valid():
-
-          facet_form.cleaned_data['creator'] = request.user
-          facet_form.cleaned_data['group'] = group
-          
+ 
           facet_form.save()
         
     groups = EntryGroup.objects.filter(creator=request.user)
@@ -446,7 +471,8 @@ def edit_tags(request, group_id):
                'empty_facets': empty_facets,
                'group_list': groups,
                'facet_form': facet_form,
-               'current_group': group}
+               'current_group': group,
+               'username': request.user.username}
     
     return render_to_response('madscientist/manage_tags.html',
                               context_instance=RequestContext(request, context))
@@ -469,8 +495,6 @@ def edit_facet(request, group_id, facet_id=None):
     if request.method == 'POST':
       facet_form = DetailedFacetForm(request.POST, instance=facet)
       
-      logger.debug("form has been bound")
-      
       if facet_form.is_valid():
         
         facet_form.save()
@@ -487,7 +511,8 @@ def edit_facet(request, group_id, facet_id=None):
     context = {'group_list': groups,
                'facet_id': facet_id,
                'facet_form': facet_form,
-               'current_group': group}
+               'current_group': group,
+               'username': request.user.username}
     
     return render_to_response('madscientist/edit_facet.html',
                               context_instance=RequestContext(request, context))
