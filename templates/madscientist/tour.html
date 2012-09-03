@@ -2,13 +2,63 @@
 
 {% block content %}
  
-<div id="static">
+<div id="static" class="text-content">
 
 
 <h1>Take a Tour</h1>
 <p>
-  MadScientist: the how's and to's.
+  Want to get right to it? You can see a public board (you can't edit or add any ideas or groups, but you can
+  see it in action) <a href="/madscientist/savagerose/10/">here</a>.
 </p>
+<p>
+  MadScientist revolves around three concepts: groups (or lists), categories (or facets), and tags.
+  Although you can use them in any way that makes sense to you, I find it is useful to 
+  think about how you plan to use the store of fragments that you're saving. 
+</p>
+<p>
+  The application is designed to make it easy to label ideas quickly and consistently&mdash;once you 
+  have a basic system. You don't have to figure out everything in advance, but it pays
+  to spend some time thinking about recording and retrieval.
+  Why are you recording it? What are you planning to use it for? What are some useful ways to
+  classify the data, considering your purpose? How finely do you want to segment it?
+</p>
+<h2>Groups</h2>
+<p>
+  Groups are broad groups of ideas, usually related to your purpose for collecting them. For example,
+  I have a group called "Music Wishlist" where I jot down songs I hear on the radio that I'm thinking
+  about purchasing, and another group called "Create Me" where I store ideas for arts and crafts I want 
+  to make. So it's clear when I'm in the mood to buy some music I can just check my Music Wishlist group,
+  and so on. In MadScientist, each one appears as its own tab (see tab bar below).
+</p>
+<p><img alt="MadScientist tab bar" src="{{ STATIC_URL }}madscientist/images/tab_bar.png"/>
+</p>
+<p>When you go to write down an idea, it's best if there's one and only one obvious group to put it in.
+  Otherwise how will you be able to stumble upon it later without wasting time looking through a
+  bunch of irrelevant groups? If it's confusing, how do you know you'll always make the same decision of
+  where to put it?
+</p>
+<h2>Tags and Categories (or Facets)</h2>
+<p>
+Categories are a way to group related tags together and are intended to represent a particular aspect, or
+facet, that universally applies to a group of ideas. A category (or facet) should refer to an objective,
+intrinsic quality, so that it is immediately clear what kinds of tags belong under each category.
+For example, in a group devoted to ideas for craft projects, two useful categories are "Medium" and "Skill"
+(see the picture below for an example). 
+</p>
+<p>
+  <img src="{{ STATIC_URL }}madscientist/images/tag_pane.png"/>
+</p>
+<p>
+When the categories are chosen correctly, tags can be applied unambiguously and consistently with little
+thought. The point is not to exhaustively tag every idea with everything you can think of: the point is to be able
+to quickly identify and tag the qualities about the idea that will help you find it later. So in the case of
+craft projects, I can immediately single out all sewing project ideas for browsing.
+</p> 
+<p>
+  If you're confused about the whole idea of faceting and not sure where to start, try reading this
+  <a href="http://www.miskatonic.org/library/facet-web-howto.html">great article on faceted classification</a>.
+</p>
+<p></p>
 
 
 
