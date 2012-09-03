@@ -153,20 +153,6 @@ class DetailedFacetForm(CustomModelForm):
   class Meta:
     model = Facet
     exclude = ['creator', 'group']
-    
-  def save(self, commit=True):
-    """ For this form save is overriden so that we can manually
-        add back in two required fields excluded from the 
-        form shown to the user. """
-    
-    # Save the filled in model fields without saving to the database,
-    # which would trigger an error because both group and creator are
-    # required fields. 
-    instance = super(DetailedFacetForm, self).save(commit=False)
-    
-    instance.save()
-     
-    return instance 
       
 class LoginForm(CustomForm):
   """ Very simple form to login a user. """
