@@ -2,7 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 <title>{% block title %}
-  {{ request.user }} | Mad Scientist
+  {% if user.is_authenticated %}
+  {{ request.user }}
+  {% endif %} | Mad Scientist
         {% endblock %}</title>
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}madscientist/css/all.css">
 <link rel="shorcut icon" type="image/ico" href="{{ STATIC_URL}}madscientist/images/madscientist.ico"/>
@@ -19,8 +21,14 @@
  <img id="tagline" alt="So. Many. Ideas." src="{{ STATIC_URL}}madscientist/images/so_many_ideas2.png"/>
  
  <ul id="menu_bar">
-    <li>logged in as {{ request.user }}</li>
-    <li><a href="{% url madscientist.views.logout_user %}">logout</a></li>
+     <li><a href="/madscientist/">home</a></li>
+     {% if not user.id %} 
+     <li>Viewing public board as a guest</li>
+     <li><a href="/madscientist/login/?next={{ request.path }}">log in</a></li>
+     {% else %}
+      <li>logged in as {{ request.user }}</li>
+      <li><a href="{% url madscientist.views.logout_user %}">logout</a></li>
+     {% endif %}
  </ul>
 
   <ul id="tab_bar">
@@ -28,7 +36,7 @@
       {% if group.id == current_group.id %}
        <li class="active">{{ group.short_title}}</li>
       {% else %}
-       <li><a href="{% url madscientist.views.entry_list request.user.username group.id %}">{{ group.short_title }}</a></li>
+       <li><a href="{% url madscientist.views.entry_list username group.id %}">{{ group.short_title }}</a></li>
       {% endif %}
       
     {% endfor %}
@@ -50,11 +58,11 @@
         <h1>Tags</h1>  
           {% if current_group %}
             {% if options.show_empty_tags %}
-              <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'show_empty_tags' }}&show_empty_tags=0">
+              <a href="{% url madscientist.views.entry_list username current_group.id %}?{{ active_options|remove_and_reencode:'show_empty_tags' }}&show_empty_tags=0">
                 hide empty tags
               </a>
              {% else %}
-              <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'show_empty_tags' }}&show_empty_tags=1">
+              <a href="{% url madscientist.views.entry_list username current_group.id %}?{{ active_options|remove_and_reencode:'show_empty_tags' }}&show_empty_tags=1">
                 show empty tags
               </a>        
              {% endif %}
@@ -82,7 +90,7 @@
                 {% if tag.active %}
                   <li class="tag active">
                             
-                    <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'tag' }}&{{ options.active_tags|remove_from_list:tag.id|encode_list:'tag' }}">
+                    <a href="{% url madscientist.views.entry_list username current_group.id %}?{{ active_options|remove_and_reencode:'tag' }}&{{ options.active_tags|remove_from_list:tag.id|encode_list:'tag' }}">
                     
                       {{ tag.name }} ({{ tag.num_ideas }})</a>
                   </li>              
@@ -94,7 +102,7 @@
                    {% else %}
                     <li class="tag">
                       
-                      <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'tag' }}&tag={{ tag.id }}&{{ options.active_tags|encode_list:'tag' }}">
+                      <a href="{% url madscientist.views.entry_list username current_group.id %}?{{ active_options|remove_and_reencode:'tag' }}&tag={{ tag.id }}&{{ options.active_tags|encode_list:'tag' }}">
                         {{ tag.name }} ({{ tag.num_ideas }})</a>
                     </li>
                     {% endif %}
@@ -149,6 +157,7 @@
         
         {% for entry in entry_list %}
           <li>
+              <a name="entry{{ entry.id }}"></a>
               {% if entry.id|slugify == options.expand_id %}
               
                <span class="title">{{ entry.title }}
@@ -164,7 +173,7 @@
                 
                 <p class="tags">tags: {{ entry.tags.all|join:", "|default:"none" }}</p>
                 
-                <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'expand' }}">(less)</a>
+                <a href="?{{ active_options|remove_and_reencode:'expand' }}#entry{{ entry.id }}">(less)</a>
                 
               {% else %}
               
@@ -175,7 +184,7 @@
                   &ndash; {{ entry.body|safe|truncatewords_html:10 }}
                 {% endif %} 
                 
-                <a href="{% url madscientist.views.entry_list request.user.username current_group.id %}?{{ active_options|remove_and_reencode:'expand' }}&expand={{ entry.id }}">(more)</a> 
+                <a href="?{{ active_options|remove_and_reencode:'expand' }}&expand={{ entry.id }}#entry{{ entry.id }}">(more)</a> 
                  
              {% endif %}
            </li>
