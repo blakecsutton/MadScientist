@@ -1,7 +1,8 @@
 from django import forms
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.forms.util import ErrorList
 from models import Entry, Tag, Facet, EntryGroup
-from django.contrib.auth.models  import User
 from widgets import FacetedColumnCheckboxSelectMultiple
 import logging
 
@@ -161,7 +162,29 @@ class LoginForm(CustomForm):
 
     
 class NewUserForm(CustomForm):
-  """ Very simple form to create a new user. """
+  """ Very simple form to create a new user. 
+      To be replaced with the django-registration app someday. """
+  
   email = forms.EmailField(label="Email", required=True)
   username = forms.CharField(label="Username", required=True) 
   password = forms.CharField(widget=forms.PasswordInput(), label="Password", required=True)
+  
+  def clean_username(self):
+    """ Basic username validator.
+    """
+    
+    # Check if there are spaces in the username, since this causes problems.
+    username = self.cleaned_data['username']
+    if ' ' in username:
+      raise ValidationError("Username can't have spaces.")
+    
+    # Check for existing user with same username.
+    existing_user = User.objects.filter(username=username)
+    if existing_user:
+      raise ValidationError("This username has already been taken.")
+    
+    return self.cleaned_data['username']
+
+
+
+
