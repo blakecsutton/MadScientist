@@ -19,7 +19,7 @@
   {% else %}
     <h2>Add New {{ current_group.short_title }} Entry</h2>
   {% endif %}
-  <form method="post" class="data">{% csrf_token %}
+  <form enctype="multipart/form-data" method="post" class="data">{% csrf_token %}
     <fieldset class="post">
       {{ entry_form.as_p }}
     </fieldset>  
