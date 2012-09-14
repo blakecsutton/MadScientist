@@ -216,8 +216,11 @@
                   </a>
                 </li>  
                 {% endif %}
-             {% else %}
-                <li class="calendar_item">
+             {% else %}     
+                {% if forloop.counter0 > 0 and forloop.counter0|divisibleby:"7" %}
+                  <div class="clearfix"></div>
+                {% endif %}     
+                <li class="calendar_item">        
                   <span class="date">{{ entry.date_created }}</span>
                   <a href="{% url madscientist.views.edit_entry current_group.id entry.id %}">
                     {{ entry.title }}         
