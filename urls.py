@@ -1,5 +1,12 @@
 from django.conf.urls.defaults import patterns
 
+# This import is here because this seems to be the only way to make the
+# custom 403 handler view register.
+import django.conf.urls
+
+# Custom 403 template for this app
+django.conf.urls.handler403 = 'madscientist.views.error_forbidden'
+
 urlpatterns = patterns('django.views.generic.simple',
                        
     (r'^whats-it-do/', 'direct_to_template', {'template': 'madscientist/what.html'}),
@@ -7,8 +14,10 @@ urlpatterns = patterns('django.views.generic.simple',
     (r'^about/', 'direct_to_template', {'template': 'madscientist/about.html'}),
     
 )
+
+
 """
-@TODO: Make URLs include the username and such.
+@TODO: Make URLs include the username and slugs.
 Pinterest style:
 
 Boards pages is pinterest.com/savagerose/
@@ -39,4 +48,3 @@ urlpatterns += patterns('madscientist.views',
     (r'^(?P<username>\w+)/(?P<group_id>\d+)/$', 'entry_list'),
     
 ) 
-
