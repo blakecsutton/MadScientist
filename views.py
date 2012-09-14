@@ -7,6 +7,7 @@ from django.db.models.aggregates import Count
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
+from django.views.generic.simple import direct_to_template
 from forms import LoginForm, EntryForm, FacetForm, EntryGroupForm, \
   DetailedFacetForm, NewUserForm
 from models import Entry, Facet, Tag, EntryGroup
@@ -20,8 +21,6 @@ def home(request, username=None):
 
   # Check that username in the URL matches username in the session.
   if username:
-    
-    logger.debug("Username is {}".format(username))
     
     if request.user.username != username:
       raise PermissionDenied()
@@ -65,13 +64,10 @@ def entry_list(request, username, group_id):
               not group.public):
             raise PermissionDenied()
           
-          logger.debug("request.user is {}".format(request.user))
           if logged_in:
             user = request.user
           else:
             user = User.objects.get(username=username)
-            
-          logger.debug("and now user is {}".format(user))
              
       else:
         # If an unauthenticated user tries to view a non-public group,
@@ -104,9 +100,7 @@ def entry_list(request, username, group_id):
           for tag_id in tag_filter:
             if tag_id.isdigit():
               options['active_tags'].append(tag_id)
-              
-          logger.debug("active_tags list is: {}".format(options['active_tags']))
-                
+                       
           # If tags were received, actually filter the entry list by tag name
           for tag in options['active_tags']:
             # Successively filter by each active tag.
@@ -152,7 +146,9 @@ def entry_list(request, username, group_id):
       # Todo in future: add an ordering fields to EntryGroups so users can rearrange tabs.
       # Also probably a "pinned" flag to indicate whether or not to currently display it.
       groups = EntryGroup.objects.filter(creator=user)
-          
+      
+      display = active_options.get('display', 'list')
+        
       context = {'entry_list': entries,
                  'tags': tags,
                  'empty_facets': empty_facets,
@@ -160,8 +156,9 @@ def entry_list(request, username, group_id):
                  'options': options,
                  'group_list': groups,
                  'current_group': group,
-                 'username': user.username}
-      
+                 'username': user.username,
+                 'display': display}
+    
     else:
       context = {}
       
@@ -217,13 +214,9 @@ def edit_entry(request, group_id, entry_id=None):
         tag_facet_id = submit_new_tag.split('-')[2]
         #tag_input_name = submit_new_tag
         tag_name = request.POST.get(submit_new_tag, "")
-        
-        logger.debug("Submit_new_tag is: {}".format(submit_new_tag))
-        logger.debug("Pulling {} out of the POST gives you {}".format(submit_new_tag, tag_name))
-        
+           
         # Doing own validation here
         if len(tag_name) > 0:
-          logger.debug("Tag form is valid, yo.")
           
           if tag_facet_id != "None":
             tag_facet = Facet.objects.get(pk=tag_facet_id)
@@ -256,7 +249,7 @@ def edit_entry(request, group_id, entry_id=None):
       
         # Bind the post request to the Entry ModelForm for validation and redisplay 
         # in case of errors.
-        entry_form = EntryForm(request.POST, instance=entry)
+        entry_form = EntryForm(request.POST, request.FILES, instance=entry)
 
         if entry_form.is_valid():
             
@@ -264,7 +257,7 @@ def edit_entry(request, group_id, entry_id=None):
           entry_tag_list = request.POST.getlist('tags[]')
           entry_tags = Tag.objects.in_bulk(entry_tag_list)
           entry_form.cleaned_data['tags'] = entry_tags
-                               
+                        
           # Using the models' validated data, actually create a corresponding 
           # model instance and save it to the database.
           entry_form.save()
@@ -285,8 +278,8 @@ def edit_entry(request, group_id, entry_id=None):
         entry_tags = [tag_id for tag_id in entry_tags]
         
         entry_draft = {"title": request.POST.get("title", ""),
-                       "body": request.POST.get("body", ""),
-                       "image": request.POST.get("image", "")}
+                       "body": request.POST.get("body", "")}
+ 
         entry_form = EntryForm(initial=entry_draft)
 
     else:
@@ -348,8 +341,6 @@ def edit_group(request, group_id=None):
     
     # Bind the request data to the form plus the model instance
     group_form = EntryGroupForm(request.POST, instance=group)
-    
-    logger.debug("ohai!")
     
     # Use the model form's automatic validation and save
     if group_form.is_valid():
@@ -542,7 +533,6 @@ def delete_facet(request, group_id, facet_id):
 @login_required(login_url="/madscientist/login/")   
 def logout_user(request):
   
-  logger.debug("What is going on here?")
   logout(request)
   return render_to_response('madscientist/success.html',
                             context_instance=RequestContext(request))
@@ -606,23 +596,17 @@ def login_user(request):
         signup_form = NewUserForm(request.POST)
         if signup_form.is_valid():
           
-          # Check for existing user with same username
-          existing_user = User.objects.filter(username=signup_form.cleaned_data['username'])
+          new_user = User.objects.create_user(**signup_form.cleaned_data)
+          new_user.save()
           
-          if existing_user:
-            signup_form.is_valid = False
-            signup_form.errors['username'] = ["This username has already been taken."]
-          else:
-            new_user = User.objects.create_user(**signup_form.cleaned_data)
-            new_user.save()
-
-            # Authenticate and log in as the newly created user
-            username = signup_form.cleaned_data['username']
-            password = signup_form.cleaned_data['password']
-            user = authenticate(username=username, password=password)
-            login(request, user)
-            return HttpResponseRedirect(reverse('madscientist.views.home', 
-                                                kwargs={'username': request.user.username}))
+          # Authenticate and log in as the newly created user
+          username = signup_form.cleaned_data['username']
+          password = signup_form.cleaned_data['password']
+          user = authenticate(username=username, password=password)
+          login(request, user)
+          return HttpResponseRedirect(reverse('madscientist.views.home', 
+                                              kwargs={'username': request.user.username}))
+                                                
                 
   else:
     # Create a blank login form and a blank signup form,
@@ -637,6 +621,6 @@ def login_user(request):
                              context_instance=RequestContext(request, context)) 
       
       
-      
-      
-      
+def error_forbidden(request):
+
+  return direct_to_template(request, 'madscientist/403.html')
