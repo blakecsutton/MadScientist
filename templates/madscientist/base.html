@@ -21,14 +21,15 @@
  <img id="tagline" alt="So. Many. Ideas." src="{{ STATIC_URL}}madscientist/images/so_many_ideas2.png"/>
  
  <ul id="menu_bar">
-     <li><a href="/madscientist/">home</a></li>
+  
      {% if not user.id %} 
-     <li>Viewing public board as a guest</li>
+     <li>Hi, guest!</li>
      <li><a href="/madscientist/login/?next={{ request.path }}">log in</a></li>
      {% else %}
-      <li>logged in as {{ request.user }}</li>
+      <li>Sup, {{ request.user }}?</li>
       <li><a href="{% url madscientist.views.logout_user %}">logout</a></li>
      {% endif %}
+     <li>| <a href="/madscientist/about/">about</a></li>
  </ul>
 
   <ul id="tab_bar">
@@ -217,7 +218,7 @@
                 {% endif %}
              {% else %}
                 <li class="calendar_item">
-                  {{ entry.date_created }} <br>
+                  <span class="date">{{ entry.date_created }}</span>
                   <a href="{% url madscientist.views.edit_entry current_group.id entry.id %}">
                     {{ entry.title }}         
                   </a>
