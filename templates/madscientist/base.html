@@ -148,44 +148,80 @@
       {% endif %}
       
       {% if current_group %}
-      <h4>{{ entry_list|length }} Entries, sorted by Date Created
-          <a href="{% url madscientist.views.edit_group current_group.id %}">(edit this group)</a></h4>
+      <h4>{{ entry_list|length }} entries displayed as:
+         
+          {% if display == "list" %}
+            list 
+          {% else %}
+          <a href="/madscientist/{{ username }}/{{ current_group.id }}/?{{ active_options|remove_and_reencode:'display' }}&display=list">list</a>
+          {% endif %}
+          |
+          {% if display == "images" %}
+             images only
+          {% else %}
+            <a href="/madscientist/{{ username }}/{{ current_group.id }}/?{{ active_options|remove_and_reencode:'display' }}&display=images">images only</a>
+          {% endif %}
+          |
+          {% if display == "calendar" %}
+            date grid
+          {% else %}
+            <a href="/madscientist/{{ username }}/{{ current_group.id }}/?{{ active_options|remove_and_reencode:'display' }}&display=calendar">date grid</a>
+          {% endif %}
+                    
+ 
+          <a href="{% url madscientist.views.edit_group current_group.id %}">(edit this group)</a>
+      </h4>
       <ul id="entries">
         <li id="add_new_entry">Think of something brilliant? 
           <a href="{% url madscientist.views.edit_entry current_group.id %}">Write it down!</a>
         </li>
         
         {% for entry in entry_list %}
-          <li>
-              <a name="entry{{ entry.id }}"></a>
-              {% if entry.id|slugify == options.expand_id %}
-              
-               <span class="title">{{ entry.title }}
-                  <a href="{% url madscientist.views.edit_entry current_group.id entry.id %}">(edit)</a>               
-                </span> 
-         
-                 {% if entry.body  %}
-                  <span class="body">
-                    {{ entry.body|linebreaks|safe }}
-                  </span>
-                  {% if entry.image %}<img src="{{ entry.image.url }}"/>{% endif %}
+          {% if display == "list" %}
+            <li>  
+                <a name="entry{{ entry.id }}"></a>
+                {% if entry.id|slugify == options.expand_id %}
+                
+                 <span class="title">{{ entry.title }}
+                    <a href="{% url madscientist.views.edit_entry current_group.id entry.id %}">(edit)</a>               
+                  </span> 
+
+                    <span class="body">
+                      {{ entry.body|linebreaks|safe }}               
+                       {% if entry.image %}<img src="{{ entry.image.url }}"/>{% endif %}
+                    </span>
+                  
+                  <p><span class="meta">Tags</span>: {{ entry.tags.all|join:", "|default:"none" }}</p>
+                  <p><span class="meta">Created on</span>: {{ entry.date_created }}.</p>
+                  <a href="?{{ active_options|remove_and_reencode:'expand' }}#entry{{ entry.id }}">(less)</a>
+                  
+                {% else %}
+                
+                  <span class="title">{{ entry.title }}
+                  </span> 
+                
+                  {% if entry.body %}
+                    &ndash; {{ entry.body|safe|truncatewords_html:10 }}
+                  {% endif %} 
+                  
+                  <a href="?{{ active_options|remove_and_reencode:'expand' }}&expand={{ entry.id }}#entry{{ entry.id }}">(more)</a> 
+                   
+               {% endif %}
+             {% elif display == "images" %}
+                {% if entry.image %}
+                <li class="image_item">
+                  <a href="{% url madscientist.views.edit_entry current_group.id entry.id %}">
+                      <img src="{{ entry.image.url }}"/>            
+                  </a>
+                </li>  
                 {% endif %}
-                
-                <p class="tags">tags: {{ entry.tags.all|join:", "|default:"none" }}</p>
-                
-                <a href="?{{ active_options|remove_and_reencode:'expand' }}#entry{{ entry.id }}">(less)</a>
-                
-              {% else %}
-              
-                <span class="title">{{ entry.title }}
-                </span> 
-              
-                {% if entry.body %}
-                  &ndash; {{ entry.body|safe|truncatewords_html:10 }}
-                {% endif %} 
-                
-                <a href="?{{ active_options|remove_and_reencode:'expand' }}&expand={{ entry.id }}#entry{{ entry.id }}">(more)</a> 
-                 
+             {% else %}
+                <li class="calendar_item">
+                  {{ entry.date_created }} <br>
+                  <a href="{% url madscientist.views.edit_entry current_group.id entry.id %}">
+                    {{ entry.title }}         
+                  </a>
+                </li>
              {% endif %}
            </li>
         {% endfor %}
